@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>燕云十六声 · 自由演奏编排器</title>
+<link rel="stylesheet" href="燕云自由演奏编排器.css" />
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">♪</div>
+      <div>
+        <h1>燕云十六声 · 自由演奏编排器</h1>
+        <p class="sub">琴键单击只试听　·　在钢琴卷格子上放音符 → 输出键盘按键</p>
+      </div>
+    </div>
+    <div class="tools">
+      <button class="tool on" id="btnSound" title="开关声音">🔊 声音</button>
+      <button class="tool" id="btnUndo" title="撤销上一步">↶ 撤销</button>
+      <button class="tool" id="btnClear" title="清空全部">清空</button>
+      <span class="tsep"></span>
+      <button class="tool" id="btnCopy" title="复制整条键位序列">⧉ 复制</button>
+      <button class="tool" id="btnPaste" title="粘贴序列（键位链 / 音名 / JSON）">📋 粘贴</button>
+      <button class="tool" id="btnExport" title="导出乐谱文件">⇩ 导出</button>
+      <button class="tool" id="btnImport" title="导入乐谱（JSON / 文本 / MIDI）">⇧ 导入</button>
+      <input type="file" id="fileInput" accept=".json,.txt,.mid,.midi,application/json,text/plain,audio/midi" hidden />
+    </div>
+  </header>
+
+  <div class="timingbar">
+    <span class="tb-title">⏱ 节奏</span>
+    <label class="tb-field">BPM
+      <input id="bpm" type="number" min="30" max="300" step="1" value="120" />
+    </label>
+    <label class="tb-field">每格
+      <select id="grid">
+        <option value="4">4 分音符</option>
+        <option value="8" selected>8 分音符</option>
+        <option value="16">16 分音符</option>
+        <option value="32">32 分音符</option>
+      </select>
+    </label>
+    <label class="tb-field">新音长
+      <select id="lenSel">
+        <option value="1" selected>1 格</option>
+        <option value="2">2 格</option>
+        <option value="4">4 格</option>
+        <option value="8">8 格</option>
+        <option value="16">16 格</option>
+      </select>
+    </label>
+    <span class="tb-info" id="tbInfo">每格 141ms</span>
+    <span class="tb-spacer"></span>
+    <button class="tool" id="btnCopyCmd" title="复制生成的演奏命令">⧉ 复制命令</button>
+  </div>
+
+  <main class="stage">
+    <section class="keyboard">
+      <div class="colhead"><span>琴键</span><span class="tag">36 键 · 单击试听 · Shift 升半音 · Ctrl 降半音</span></div>
+      <div class="keys" id="keys"></div>
+    </section>
+
+    <section class="rollwrap">
+      <div class="colhead"><span>钢琴卷</span><span class="tag" id="colTag">16 格 · 左键写 · 右键删 · 滚轮左右滚</span></div>
+      <div class="rollBody">
+        <div class="pitchCol" id="pitchCol" aria-hidden="true">
+          <div class="pitchHead">音高</div>
+        </div>
+        <div class="roll" id="roll">
+          <div class="ruler" id="ruler"></div>
+          <div class="rollInner" id="rollInner">
+            <div class="emptyTip" id="emptyTip">在格子上点一下放音符<br /><span style="font-size:11px;color:#4d5a6c">左键写音符 · 右键删音符 · 写满最后一列会自动再加 16 格</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="colhead">
+        <span>输出</span>
+        <div class="seg" id="panelTabs">
+          <button class="seg-btn on" data-tab="keys">键位</button>
+          <button class="seg-btn" data-tab="cmd">命令</button>
+        </div>
+        <span class="count" id="count">0 个音</span>
+      </div>
+      <div class="list" id="list"></div>
+      <pre class="cmdview" id="cmdview" hidden></pre>
+      <div class="panelFoot">
+        <button class="tool" id="btnHome" title="回到第 1 列，从头试听（快捷键 Home）">⤒ 回到开头</button>
+        <button class="tool wide" id="btnPlay">▶ 试听</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="footerNote">
+    电脑键盘试听：Q W E R T Y U（高音）· A S D F G H J（中音）· Z X C V B N M（低音），加 Shift 为升半音（#1 #4 #5）　·　降半音（b3 b7）直接点上方琴键　·　钢琴卷：左键写音符、右键删音符、滚轮左右滚动、写满第 16 列自动再加 16 格　·　输出面板里的键位就是游戏里要按的键
+  </div>
+</div>
+
+<!-- 粘贴 / 导入 弹窗 -->
+<div class="modal" id="modal" aria-hidden="true">
+  <div class="modalBox">
+    <div class="modalHead">
+      <span id="modalTitle">粘贴序列</span>
+      <button class="modalX" id="modalClose" title="关闭">×</button>
+    </div>
+    <textarea id="modalText" spellcheck="false" placeholder="在这里粘贴：&#10;Q → W → Shift+E → Ctrl+U …&#10;1' → 2' → #4 → b3 …&#10;或者导出的 JSON"></textarea>
+    <div class="modalInfo" id="modalInfo">支持键位链（Q、Shift+Q、Ctrl+E、↑Q、↓E）、简谱音名（1、1'、1,、#4、b3）或导出的 JSON · 打开后按 Ctrl+V 粘贴</div>
+    <div class="modalRow">
+      <label class="modalChk"><input type="checkbox" id="modalAppend" /> 追加到现有音符后面</label>
+      <span class="modalHint">Esc 关闭 · Ctrl+Enter 确认</span>
+    </div>
+    <div class="modalFoot">
+      <button class="tool" id="modalCancel">取消</button>
+      <button class="tool on" id="modalOk" disabled>导入并替换</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="燕云自由演奏编排器.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+

@@ -1,0 +1,13 @@
+# 运行时生成（不要提交）
+player/last-commands.txt
+player/settings.ini
+player/crash.log
+player/selftest.log
+*.log
+
+# IDE / 构建产物
+.vs/
+bin/
+obj/
+*.user
+*.suo

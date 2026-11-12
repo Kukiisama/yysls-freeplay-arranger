@@ -1,0 +1,14 @@
+# 示例：高音 C 大调 + 半音（可以先用记事本试）
+KEY Q 300
+KEY W 300
+KEY E 300
+KEY R 300
+KEY T 300
+KEY Y 300
+KEY U 600
+400ms
+KEY Shift+Q 300
+KEY Shift+R 300
+KEY Shift+T 300
+KEY Ctrl+E 300
+KEY Ctrl+U 600
