@@ -31,7 +31,6 @@
 - [常见问题](#常见问题)
 - [从源码构建](#从源码构建)
 - [文件说明](#文件说明)
-- [GitHub 仓库简介（About）](#github-仓库简介about)
 - [许可证](#许可证)
 - [免责声明](#免责声明)
 
@@ -525,24 +524,6 @@ Windows 的 `SendInput` 发送到当前前台窗口；工具默认还会校验�
 | `images/arranger.png` | 编排器界面截图 |
 | `images/player.png` | 演奏器界面截图 |
 | `images/file-picker.png` | 内置文件选择器截图 |
-
----
-
-## GitHub 仓库简介（About）
-
-可以直接复制到 GitHub 仓库右上角的 **About**：
-
-```text
-燕云十六声自由演奏 36 键乐谱编排 + 自动演奏器：简谱/MIDI → 按键谱 → F8 全局热键后台演奏。Windows / WinForms / SendInput。
-```
-
-**Topics 建议**：
-
-```text
-yanyun  yysls  燕云十六声  music  piano-roll  autoplay  winforms  csharp  windows
-```
-
-**仓库名建议**：`yysls-freeplay-arranger`
 
 ---
 
